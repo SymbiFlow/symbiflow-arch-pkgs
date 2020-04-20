@@ -15,11 +15,26 @@ jobs:
       volumes:
         - /sys/fs/cgroup:/sys/fs/cgroup
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get date
+        id: date
+        run: echo "::set-output name=date::$(date +%F)"
+
+      - name: Cache
+        uses: actions/cache@v1
+        with:
+          path: /var/cache/pacman/pkg
+          key: arch-pkgs-${{ steps.date.outputs.date }}
+          restore-keys: arch-pkgs
+
       - name: Update system and install dependencies
         run: pacman -Syu --noconfirm --noprogressbar --needed base-devel devtools btrfs-progs dbus sudo
+
       - name: Populate /etc/machine-id
         run: dbus-uuidgen --ensure=/etc/machine-id
+
       - name: Setup mkepkg configuration
         run: sed -i -e "s|MAKEFLAGS=.*|MAKEFLAGS=-j$(nproc)|"
                     -e "s|#PKGDEST=.*|PKGDEST='$HOME/packages'|"
@@ -27,10 +42,12 @@ jobs:
                     -e "s|#SRCPKGDEST=.*|SRCPKGDEST='$HOME/srcpackages'|"
                     -e "s|#LOGDEST=.*|LOGDEST='$HOME/makepkglogs'|"
                     /etc/makepkg.conf
+
       - name: Setup build user
         run: |
           useradd -m user
           chown -R user "$HOME" "$GITHUB_WORKSPACE"
+
       - name: Build yosys-git
         run: |
           cd "$GITHUB_WORKSPACE"/yosys-git
