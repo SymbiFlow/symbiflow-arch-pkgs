@@ -1,0 +1,67 @@
+# Maintainer: Filipe Laíns (FFY00) <lains@archlinux.org>
+# Contributos: Felix Yan <felixonmars@archlinux.org>
+# Contributor: Benoît Allard <benoit dot allard at gmx dot de>
+# Contributor: killruana <killruana@gmail.com>
+
+pkgname=yosys
+pkgver=dummy
+pkgrel=1
+pkgdesc='A framework for RTL synthesis'
+arch=('x86_64')
+url='http://www.clifford.at/yosys/'
+license=('custom:ISC')
+depends=('bash' 'tcl' 'libffi' 'python' 'protobuf')
+makedepends=('git')
+optdepends=('graphviz: Schematics display support'
+            'xdot: Display netlists')
+source=('git+https://github.com/cliffordwolf/yosys.git'
+        'git+https://github.com/berkeley-abc/abc.git')
+sha512sums=('SKIP'
+            'SKIP')
+
+pkgver() {
+    cd "$srcdir"/$pkgname
+
+    printf '%s.r%s.%s' \
+        $(git tag | tail -n1 | sed 's|yosys-||') \
+        $(git rev-list --count HEAD) \
+        $(git rev-parse --short HEAD)
+
+    cd "$srcdir"/abc
+
+    printf '+%s' $(git rev-parse --short HEAD)
+}
+
+prepare() {
+    ln -s "$srcdir"/abc $pkgname/abc
+}
+
+_make() {
+    make \
+        PREFIX=/usr \
+        ABCREV=default \
+        CONFIG=gcc \
+        ENABLE_TCL=1 \
+        ENABLE_ABC=1 \
+        ENABLE_GLOB=1 \
+        ENABLE_PLUGINS=1 \
+        ENABLE_LIBYOSYS=1 \
+        ENABLE_PROTOBUF=1 \
+        ENABLE_ZLIB=1 \
+        ENABLE_PYOSYS=0 $@
+}
+
+build() {
+    cd $pkgname
+
+    _make
+}
+
+package() {
+    cd $pkgname
+
+    _make DESTDIR="$pkgdir" install
+
+    install -D -m 644 COPYING "$pkgdir"/usr/share/licenses/$pkgname/COPYING
+}
+
