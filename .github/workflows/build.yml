@@ -53,3 +53,15 @@ jobs:
           cd "$GITHUB_WORKSPACE"/yosys-git
           extra-x86_64-build -- -U user
 
+      - name: Generate repo database
+        run: |
+          cd "$HOME"/packages
+          repo-add symbiflow-git.db.tar.gz *.pkg.*
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          BRANCH: repo
+          FOLDER: ~/packages
+          SINGLE_COMMIT: true
