@@ -15,9 +15,6 @@ jobs:
       volumes:
         - /sys/fs/cgroup:/sys/fs/cgroup
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Get date
         id: date
         run: echo "::set-output name=date::$(date +%F)"
@@ -30,17 +27,30 @@ jobs:
           restore-keys: arch-pkgs
 
       - name: Update system and install dependencies
-        run: pacman -Syu --noconfirm --noprogressbar --needed base-devel devtools btrfs-progs dbus sudo
+        run: pacman -Syu --noconfirm --noprogressbar --needed base-devel devtools btrfs-progs dbus sudo git
+
+      - name: Checkout master
+        uses: actions/checkout@v2
+        with:
+          path: master
+
+      - name: Checkout repo
+        run: git clone --branch gh-pages https://github.com/${{ github.repository }}.git repo
 
       - name: Populate /etc/machine-id
         run: dbus-uuidgen --ensure=/etc/machine-id
 
+      - name: Setup git
+        run: |
+          git config --global user.email action@github.com
+          git config --global user.name 'Github Action'
+          git config --global core.editor true
 
       - name: Setup mkepkg configuration
         run: |
-          mkdir -p "$HOME"/{packages,sources,srcpackages,makepkglogs}
+          mkdir -p "$HOME"/{sources,srcpackages,makepkglogs}
           sed -i -e "s|MAKEFLAGS=.*|MAKEFLAGS=-j$(nproc)|" \
-                 -e "s|#PKGDEST=.*|PKGDEST='$HOME/packages'|" \
+                 -e "s|#PKGDEST=.*|PKGDEST='$GITHUB_WORKSPACE/repo'|" \
                  -e "s|#SRCDEST=.*|SRCDEST='$HOME/sources'|" \
                  -e "s|#SRCPKGDEST=.*|SRCPKGDEST='$HOME/srcpackages'|" \
                  -e "s|#LOGDEST=.*|LOGDEST='$HOME/makepkglogs'|" \
@@ -51,20 +61,32 @@ jobs:
           useradd -m user
           chown -R user "$HOME" "$GITHUB_WORKSPACE"
 
+      - name: Remove existing packages
+        run: |
+          rm -f "$GITHUB_WORKSPACE"/repo/yosys-git-*.pkg.*
+
       - name: Build yosys-git
         run: |
-          cd "$GITHUB_WORKSPACE"/yosys-git
+          cd "$GITHUB_WORKSPACE"/master/yosys-git
           extra-x86_64-build -- -U user
 
       - name: Generate repo database
         run: |
-          cd "$HOME"/packages
+          cd "$GITHUB_WORKSPACE"/repo
           repo-add symbiflow-git.db.tar.gz *.pkg.*
 
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@releases/v3
+      - name: Commit packages
+        run: |
+          cd "$GITHUB_WORKSPACE"/repo
+          git add *
+          git commit --fixup HEAD || true
+          git rebase -i --autosquash --root
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
         with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          BRANCH: repo
-          FOLDER: ~/packages
-          SINGLE_COMMIT: true
+          github_token: ${{ secrets.ACCESS_TOKEN }}
+          branch: gh-pages
+          directory: repo
+          force: true
+
