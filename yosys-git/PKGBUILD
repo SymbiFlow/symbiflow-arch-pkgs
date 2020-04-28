@@ -3,7 +3,8 @@
 # Contributor: Benoît Allard <benoit dot allard at gmx dot de>
 # Contributor: killruana <killruana@gmail.com>
 
-pkgname=yosys
+_pkgname=yosys
+pkgname=$_pkgname-git
 pkgver=dummy
 pkgrel=1
 pkgdesc='A framework for RTL synthesis'
@@ -12,6 +13,8 @@ url='http://www.clifford.at/yosys/'
 license=('custom:ISC')
 depends=('bash' 'tcl' 'libffi' 'python') # 'protobuf'
 makedepends=('git')
+provides=($_pkgname)
+conflicts=($_pkgname)
 optdepends=('graphviz: Schematics display support'
             'xdot: Display netlists')
 source=('git+https://github.com/cliffordwolf/yosys.git'
@@ -20,7 +23,7 @@ sha512sums=('SKIP'
             'SKIP')
 
 pkgver() {
-    cd "$srcdir"/$pkgname
+    cd "$srcdir"/$_pkgname
 
     printf '%s.r%s.%s' \
         $(git tag | tail -n1 | sed 's|yosys-||') \
@@ -33,7 +36,7 @@ pkgver() {
 }
 
 prepare() {
-    ln -s "$srcdir"/abc $pkgname/abc
+    ln -s "$srcdir"/abc $_pkgname/abc
 }
 
 _make() {
@@ -52,13 +55,13 @@ _make() {
 }
 
 build() {
-    cd $pkgname
+    cd $_pkgname
 
     _make
 }
 
 package() {
-    cd $pkgname
+    cd $_pkgname
 
     _make DESTDIR="$pkgdir" install
 
