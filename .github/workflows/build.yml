@@ -75,6 +75,10 @@ jobs:
           cd "$GITHUB_WORKSPACE"/repo
           repo-add symbiflow-git.db.tar.gz *.pkg.*
 
+      - name: Generate index.html for repo
+        run: |
+          "$GITHUB_WORKSPACE"/master/generate-index.sh "$GITHUB_WORKSPACE"/repo
+
       - name: Commit packages
         run: |
           cd "$GITHUB_WORKSPACE"/repo
