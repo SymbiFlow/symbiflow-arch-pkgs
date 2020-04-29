@@ -83,6 +83,7 @@ jobs:
       - name: Commit packages
         run: |
           cd "$GITHUB_WORKSPACE"/repo
+          git add -u
           git add *
           git commit --fixup HEAD || true
           git rebase -i --autosquash --root
