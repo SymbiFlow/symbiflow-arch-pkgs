@@ -18,7 +18,7 @@ conflicts=($_pkgname)
 optdepends=('graphviz: Schematics display support'
             'xdot: Display netlists')
 source=('git+https://github.com/cliffordwolf/yosys.git'
-        'git+https://github.com/berkeley-abc/abc.git')
+        'yosyshq-abc::git+https://github.com/YosysHQ/abc.git')
 sha512sums=('SKIP'
             'SKIP')
 
@@ -29,14 +29,10 @@ pkgver() {
         $(git tag | tail -n1 | sed 's|yosys-||') \
         $(git rev-list --count HEAD) \
         $(git rev-parse --short HEAD)
-
-    cd "$srcdir"/abc
-
-    printf '+%s' $(git rev-parse --short HEAD)
 }
 
 prepare() {
-    ln -s "$srcdir"/abc $_pkgname/abc
+    ln -s "$srcdir"/yosyshq-abc $_pkgname/abc
 }
 
 _make() {
