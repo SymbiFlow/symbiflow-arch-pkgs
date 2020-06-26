@@ -62,13 +62,13 @@ jobs:
       - name: Update system and install dependencies
         run: pacman -Syu --noconfirm --noprogressbar --needed base-devel devtools btrfs-progs dbus sudo git
 
+      - name: Add symbiflow-git repo to /usr/share/devtools/pacman-extra.conf
+        run: echo -e '\n[symbiflow-git]\nSigLevel = Optional\nServer = https://ffy00.github.io/symbiflow-arch-pkgs/' >> /usr/share/devtools/pacman-extra.conf
+
       - name: Checkout master
         uses: actions/checkout@v2
         with:
           path: master
-
-      - name: Checkout repo
-        run: git clone --branch gh-pages https://github.com/${{ github.repository }}.git repo
 
       - name: Populate /etc/machine-id
         run: dbus-uuidgen --ensure=/etc/machine-id
@@ -81,9 +81,9 @@ jobs:
 
       - name: Setup mkepkg configuration
         run: |
-          mkdir -p "$HOME"/{sources,srcpackages,makepkglogs}
+          mkdir -p "$HOME"/{build,sources,srcpackages,makepkglogs}
           sed -i -e "s|MAKEFLAGS=.*|MAKEFLAGS=-j$(nproc)|" \
-                 -e "s|#PKGDEST=.*|PKGDEST='$GITHUB_WORKSPACE/repo'|" \
+                 -e "s|#PKGDEST=.*|PKGDEST='$HOME/build'|" \
                  -e "s|#SRCDEST=.*|SRCDEST='$HOME/sources'|" \
                  -e "s|#SRCPKGDEST=.*|SRCPKGDEST='$HOME/srcpackages'|" \
                  -e "s|#LOGDEST=.*|LOGDEST='$HOME/makepkglogs'|" \
@@ -106,6 +106,12 @@ jobs:
           extra-x86_64-build -- -U user
         env:
           PROJECT: ${{ matrix.project }}
+
+      - name: Checkout repo
+        run: git clone --branch gh-pages https://github.com/${{ github.repository }}.git "$GITHUB_WORKSPACE"/repo
+
+      - name: Copy build files to repo
+        run: cp "$HOME"/build/* "$GITHUB_WORKSPACE"/repo/
 
       - name: Generate repo database
         run: |
