@@ -1,0 +1,39 @@
+# Maintainer: Filipe Laíns (FFY00) <lains@archlinux.org>
+
+_pkgname=icestorm
+pkgname=$_pkgname-git
+pkgver=r764.ed978e2
+pkgrel=1
+pkgdesc='Lattice iCE40 FPGAs bitstream documentation and simple tools for analyzing and creating bitstream files'
+arch=('x86_64')
+url='http://www.clifford.at/icestorm'
+license=('custom:ISC')
+depends=('python' 'libftdi-compat')
+makedepends=('git')
+provides=($_pkgname)
+conflicts=($_pkgname)
+source=('git+https://github.com/cliffordwolf/icestorm.git')
+sha512sums=('SKIP')
+
+pkgver() {
+  cd $_pkgname
+
+  printf 'r%s.%s' \
+      "$(git rev-list --count HEAD)" \
+      "$(git rev-parse --short HEAD)"
+}
+
+build() {
+  cd $_pkgname
+
+  make PREFIX=/usr CXX=gcc
+}
+
+package() {
+  cd $_pkgname
+
+  make DESTDIR="$pkgdir" PREFIX=/usr install
+
+  install -Dm 644 COPYING "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+}
+
