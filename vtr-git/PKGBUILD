@@ -1,0 +1,46 @@
+# Maintainer: Filipe Laíns (FFY00) <lains@archlinux.org>
+
+pkgname=vtr-git
+_pkgname=vtr-verilog-to-routing
+pkgver=dummy
+pkgrel=1
+pkgdesc='Verilog to Routing -- Open Source CAD Flow for FPGA Research'
+arch=('x86_64')
+url='https://verilogtorouting.org'
+license=('MIT')
+depends=('ctags' 'intel-tbb' 'capnproto')
+makedepends=('git' 'cmake')
+source=("git+https://github.com/verilog-to-routing/vtr-verilog-to-routing.git")
+sha512sums=('SKIP')
+
+pkgver() {
+    cd $_pkgname
+
+    printf '%s.r%s.%s' \
+        $(git tag | sed -e '/^vtr/d' -e '/^vpr/d' -e 's|^v||' -e 's|-|.|' | tail -n1) \
+        $(git rev-list --count HEAD) \
+        $(git rev-parse --short HEAD)
+}
+
+build() {
+  mkdir $_pkgname/build
+  cd $_pkgname/build
+
+  cmake .. \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DEXTERNAL_CAPNP=True
+
+  make
+}
+
+package() {
+  cd $_pkgname/build
+
+  make DESTDIR="$pkgdir" install
+
+  rm -rf "$pkgdir"/usr/bin/*.a "$pkgdir"/usr/bin/test_* "$pkgdir"/usr/bin/*_test "$pkgdir"/usr/capnp
+
+  install -Dm 644 ../LICENSE.md "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+}
+
