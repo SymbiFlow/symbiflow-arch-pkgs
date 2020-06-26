@@ -30,6 +30,9 @@ jobs:
           key: arch-pkgs-${{ steps.date.outputs.date }}
           restore-keys: arch-pkgs
 
+      - name: Add symbiflow-git repo to pacman.conf
+        run: echo -e '\n[symbiflow-git]\nSigLevel = Optional\nServer = https://ffy00.github.io/symbiflow-arch-pkgs/' >> /etc/pacman.conf
+
       - name: Update system and install dependencies
         run: pacman -Syu --noconfirm --noprogressbar --needed base-devel devtools btrfs-progs dbus sudo git
 
