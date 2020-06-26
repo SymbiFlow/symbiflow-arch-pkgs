@@ -1,0 +1,35 @@
+# Maintainer: Filipe Laíns (FFY00) <lains@archlinux.org>
+
+_pkgname=SymbiYosys
+pkgname=symbiyosis-git
+pkgver=dummy
+pkgrel=1
+pkgdesc='Front-end driver program for Yosys-based formal hardware verification flows'
+arch=('any')
+url='https://github.com/YosysHQ/SymbiYosys'
+license=('custom:ISC')
+depends=('python' 'yosys' 'z3')
+makedepends=('git')
+optdepends=('avy: Avy support'
+            'boolector: boolector support'
+            'super_prove: super_prove support'
+            'yices: Yices 2 support')
+source=("git+$url.git")
+sha512sums=('SKIP')
+
+pkgver() {
+  cd $_pkgname
+
+  printf 'r%s.%s' \
+      "$(git rev-list --count HEAD)" \
+      "$(git rev-parse --short HEAD)"
+}
+
+package() {
+  cd $_pkgname
+
+  make DESTDIR="$pkgdir" PREFIX=/usr install
+
+  install -Dm 644 COPYING "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+}
+
