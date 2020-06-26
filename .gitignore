@@ -1,2 +1,5 @@
 yosys-git/yosys
 yosys-git/abc
+yosys-git/yosyshq-abc
+prjtrellis-db-git/prjtrellis-db
+*.pkg.*
