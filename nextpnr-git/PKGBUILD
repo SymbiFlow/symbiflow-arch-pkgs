@@ -1,0 +1,54 @@
+# Maintainer: Filipe Laíns (FFY00) <lains@archlinux.org>
+
+_pkgname=nextpnr
+pkgname=$_pkgname-git
+pkgver=dummy
+pkgrel=1
+pkgdesc='Vendor neutral, timing driven, FOSS FPGA place and route tool'
+arch=('x86_64')
+url='https://github.com/YosysHQ/nextpnr'
+license=('custom:ISC')
+depends=('boost-libs' 'qt5-base' 'python')
+makedepends=('git' 'cmake' 'boost' 'eigen' 'icestorm-git' 'prjtrellis-git')
+provides=($_pkgname)
+conflicts=($_pkgname)
+source=("git+$url.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd $_pkgname
+
+  printf 'r%s.%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+build() {
+  mkdir $_pkgname/build
+  cd $_pkgname/build
+
+  cmake .. \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DARCH='generic;ice40;ecp5' \
+    -DBUILD_GUI=True \
+    -DBUILD_PYTHON=True \
+    -DBUILD_HEAP=True \
+    -DBUILD_TESTS=True \
+    -DUSE_OPENMP=True
+
+  make
+}
+
+check() {
+  cd $_pkgname/build
+
+  make test
+}
+
+package() {
+  cd $_pkgname/build
+
+  make DESTDIR="$pkgdir" install
+
+  install -Dm 644 ../COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}
+
