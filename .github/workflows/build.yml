@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: [yosys]
+        project: [prjtrellis-db, prjtrellis, yosys]
       max-parallel: 1
     container:
       image: archlinux
