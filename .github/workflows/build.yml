@@ -49,12 +49,19 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +%F)"
 
-      - name: Cache
+      - name: Cache pacman
         uses: actions/cache@v1
         with:
           path: /var/cache/pacman/pkg
           key: arch-pkgs-${{ steps.date.outputs.date }}
           restore-keys: arch-pkgs
+
+      - name: Cache srcdest
+        uses: actions/cache@v1
+        with:
+          path: sources
+          key: srcdest-${{ steps.date.outputs.date }}
+          restore-keys: srcdest
 
       - name: Add symbiflow-git repo to pacman.conf
         run: echo -e '\n[symbiflow-git]\nSigLevel = Optional\nServer = https://ffy00.github.io/symbiflow-arch-pkgs/' >> /etc/pacman.conf
