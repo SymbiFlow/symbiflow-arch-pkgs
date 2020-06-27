@@ -2,7 +2,7 @@
 
 _pkgname=icestorm
 pkgname=$_pkgname-git
-pkgver=r764.ed978e2
+pkgver=dummy
 pkgrel=1
 pkgdesc='Lattice iCE40 FPGAs bitstream documentation and simple tools for analyzing and creating bitstream files'
 arch=('x86_64')
