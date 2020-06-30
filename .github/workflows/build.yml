@@ -63,6 +63,13 @@ jobs:
           key: srcdest-${{ steps.date.outputs.date }}
           restore-keys: srcdest
 
+      # temp: until we don't overwrite packages
+      - name: Remove -git packages from cache
+        run: |
+          shopt -s nullglob
+          rm -f /var/cache/pacman/pkg/*-git-*.pkg.*
+
+
       - name: Add symbiflow-git repo to pacman.conf
         run: echo -e '\n[symbiflow-git]\nSigLevel = Optional\nServer = https://ffy00.github.io/symbiflow-arch-pkgs/' >> /etc/pacman.conf
 
