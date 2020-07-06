@@ -150,3 +150,9 @@ jobs:
           directory: repo
           force: true
 
+      # TODO: send to IRC
+      - name: Report failed job
+        if: ${{ failure() && github.ref == 'master' }}
+        run: echo "[symbiflow-arch-pkgs] failed to build $PROJECT - https://github.com/$GITHUB_REPOSITORY/runs/$GITHUB_RUN_ID"
+        env:
+          PROJECT: ${{ matrix.project }}
