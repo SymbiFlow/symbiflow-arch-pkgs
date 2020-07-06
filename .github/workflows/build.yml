@@ -53,8 +53,8 @@ jobs:
         uses: actions/cache@v1
         with:
           path: /var/cache/pacman/pkg
-          key: arch-pkgs-${{ steps.date.outputs.date }}
-          restore-keys: arch-pkgs
+          key: arch-pkgs-v1-${{ steps.date.outputs.date }}
+          restore-keys: arch-pkgs-v1
 
       - name: Cache srcdest
         uses: actions/cache@v1
@@ -62,13 +62,6 @@ jobs:
           path: sources
           key: srcdest-${{ steps.date.outputs.date }}
           restore-keys: srcdest
-
-      # temp: until we don't overwrite packages
-      - name: Remove -git packages from cache
-        run: |
-          shopt -s nullglob
-          rm -f /var/cache/pacman/pkg/*-git-*.pkg.*
-
 
       - name: Add symbiflow-git repo to pacman.conf
         run: echo -e '\n[symbiflow-git]\nSigLevel = Optional\nServer = https://ffy00.github.io/symbiflow-arch-pkgs/' >> /etc/pacman.conf
@@ -108,12 +101,6 @@ jobs:
           useradd -m user
           chown -R user "$HOME" "$GITHUB_WORKSPACE"
 
-      - name: Remove existing packages
-        run: |
-          rm -f "$GITHUB_WORKSPACE"/repo/$PROJECT-*.pkg.*
-        env:
-          PROJECT: ${{ matrix.project }}
-
       - name: Build ${{ matrix.project }}
         run: |
           cd "$GITHUB_WORKSPACE"/master/$PROJECT
@@ -125,7 +112,17 @@ jobs:
         run: git clone --branch gh-pages https://github.com/${{ github.repository }}.git "$GITHUB_WORKSPACE"/repo
 
       - name: Copy build files to repo
-        run: cp "$HOME"/build/* "$GITHUB_WORKSPACE"/repo/
+        run: |
+          for file in "$HOME"/build/*; do
+            name="$(basename "$file")"
+            if [ -f "$GITHUB_WORKSPACE"/repo/"$name" ]; then
+              echo "Removing old packages and copying $name..."
+              rm -f "$GITHUB_WORKSPACE"/repo/$(pacman -Qpq $file)-*.pkg.*
+              cp "$file" "$GITHUB_WORKSPACE"/repo/
+            fi
+          done
+        env:
+          PROJECT: ${{ matrix.project }}
 
       - name: Generate repo database
         run: |
