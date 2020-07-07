@@ -69,6 +69,9 @@ jobs:
       - name: Update system and install dependencies
         run: pacman -Syu --noconfirm --noprogressbar --needed base-devel devtools btrfs-progs dbus sudo git
 
+      - name: Fix invalid packages in symbiflow-git repo
+        run: pacman -Sw --noconfirm $(pacman -Slq symbiflow-git)
+
       - name: Add symbiflow-git repo to /usr/share/devtools/pacman-extra.conf
         run: echo -e '\n[symbiflow-git]\nSigLevel = Optional\nServer = https://ffy00.github.io/symbiflow-arch-pkgs/' >> /usr/share/devtools/pacman-extra.conf
 
