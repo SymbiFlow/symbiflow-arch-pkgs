@@ -22,7 +22,7 @@ jobs:
           BEFORE: ${{ github.event.before }}
           CURRENT: ${{ github.sha }}
         run: |
-          if [ "$EVENT" = 'schedule' ]; then
+          if [ "$EVENT" = 'schedule' ] || [ -f .build-all ]; then
             matrix="$(./list.py)"
           else
             git fetch origin $BEFORE
