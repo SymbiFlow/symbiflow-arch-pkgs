@@ -20,12 +20,13 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
           BEFORE: ${{ github.event.before }}
+          CURRENT: ${{ github.sha }}
         run: |
           if [ "$EVENT" = 'schedule' ]; then
             matrix="$(./list.py)"
           else
             git fetch origin $BEFORE
-            matrix="$(./list.py -e $(git diff --name-only $BEFORE... | sed 's|/.*||'))"
+            matrix="$(./list.py -e $(git diff --name-only $BEFORE $CURRENT | sed 's|/.*||'))"
           fi
           echo "::set-output name=matrix::$matrix"
           echo "Matrix: $matrix"
