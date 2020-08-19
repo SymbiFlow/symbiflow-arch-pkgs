@@ -51,12 +51,12 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +%F)"
 
-      - name: Cache pacman
-        uses: actions/cache@v1
-        with:
-          path: /var/cache/pacman/pkg
-          key: arch-pkgs-v1-${{ steps.date.outputs.date }}
-          restore-keys: arch-pkgs-v1
+#      - name: Cache pacman
+#        uses: actions/cache@v1
+#        with:
+#          path: /var/cache/pacman/pkg
+#          key: arch-pkgs-v1-${{ steps.date.outputs.date }}
+#          restore-keys: arch-pkgs-v1
 
       - name: Cache srcdest
         uses: actions/cache@v1
@@ -71,8 +71,8 @@ jobs:
       - name: Update system and install dependencies
         run: pacman -Syu --noconfirm --noprogressbar --needed base-devel devtools btrfs-progs dbus sudo git
 
-      - name: Fix invalid packages in symbiflow-git repo
-        run: pacman -Sw --noconfirm $(pacman -Slq symbiflow-git)
+ #     - name: Fix invalid packages in symbiflow-git repo
+ #       run: pacman -Sw --noconfirm $(pacman -Slq symbiflow-git)
 
       - name: Add symbiflow-git repo to /usr/share/devtools/pacman-extra.conf
         run: echo -e '\n[symbiflow-git]\nSigLevel = Optional\nServer = https://ffy00.github.io/symbiflow-arch-pkgs/' >> /usr/share/devtools/pacman-extra.conf
