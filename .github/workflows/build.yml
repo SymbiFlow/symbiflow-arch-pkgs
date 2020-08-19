@@ -162,11 +162,11 @@ jobs:
           directory: repo
           force: true
 
-#      - name: Push changes (GCP)
-#        uses: GoogleCloudPlatform/github-actions/upload-cloud-storage@master
-#        with:
-#          path: ${{ github.workspace }}/repo
-#          destination: symbiflow-arch-linux
+      - name: Push changes (GCP)
+        uses: GoogleCloudPlatform/github-actions/upload-cloud-storage@master
+        with:
+          path: ${{ github.workspace }}/repo
+          destination: symbiflow-arch-linux
 
       # TODO: send to IRC
       - name: Report failed job
