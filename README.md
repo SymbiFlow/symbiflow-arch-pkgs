@@ -7,5 +7,5 @@ Add a repo entry in your `/etc/pacman.conf`:
 ```ini
 [symbiflow-git]
 SigLevel = Optional
-Server = https://ffy00.github.io/symbiflow-arch-pkgs/
+Server = http://storage.googleapis.com/symbiflow-arch-linux/
 ```
